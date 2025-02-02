@@ -6,7 +6,7 @@ const Sidebar = () => {
       <div className="flex flex-col justify-between h-full">
         <div className="space-y-4">
           <h3 className="text-lg font-semibold ml-4">Logo</h3>
-          <SidebarItems />
+          <SidebarItems fullPathname={null} />
         </div>
       </div>
     </aside>

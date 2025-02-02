@@ -6,7 +6,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./Main.module.css"; // Asegúrate de que la ruta sea correcta
 
-export default function Main() {
+interface User {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
+const Main: React.FC = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [heatmapStyle, setHeatmapStyle] = useState({});
@@ -73,10 +80,18 @@ export default function Main() {
       </nav>
       <main className={styles.mainContent}>
         <span className={styles.rainbow}>RAINBOW</span> <span className={styles.data}>DATA</span>
-        <p>Welcome, {session.user.email}</p>
-        <p>Your user ID is: {session.user.id}</p>
-        <button onClick={() => signOut({ callbackUrl: "/" })} className={styles.button}>Sign Out</button>
+        {session && session.user ? (
+          <>
+            <p>Welcome, {session.user.email}</p>
+            <p>Your user ID is: {(session.user as User).id}</p>
+            <button onClick={() => signOut({ callbackUrl: "/" })} className={styles.button}>Sign Out</button>
+          </>
+        ) : (
+          <p>Loading...</p>
+        )}
       </main>
     </div>
   );
-}
+};
+
+export default Main;
