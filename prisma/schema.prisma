@@ -14,17 +14,44 @@ generator client {
 }
 
 model User {
-  id        Int         @id @default(autoincrement())
-  email     String      @unique
-  password  String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  inputs    UserInput[]
+  id             String    @id @default(uuid()) @map("_id")
+  name           String?
+  hashedPassword String?
+  email          String?   @unique
+  emailVerified  DateTime?
+  image          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  accounts       Account[]
+  userInputs     UserInput[]
+
+  @@map("user")
+}
+
+model Account {
+  id                String  @id @default(uuid()) @map("_id")
+  type              String
+  provider          String
+  providerAccountId String
+  token_type        String?
+  refresh_token     String? 
+  access_token      String? 
+  id_token          String? 
+  scope             String?
+  session_state     String?
+  expires_at        Int?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  @@unique([provider, providerAccountId])
+  @@map("account")
 }
 
 model UserInput {
   id        Int      @id @default(autoincrement())
-  userId    Int
+  userId    String
   cedula    String?  @unique
   phone     String?
   address   String?
