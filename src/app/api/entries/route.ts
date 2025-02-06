@@ -4,11 +4,10 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// GET: Obtener todas las entradas de un usuario específico
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const userEmail = searchParams.get('userEmail'); // Obtener el email del usuario desde la query
+    const userEmail = searchParams.get('userEmail'); 
 
     if (!userEmail) {
       return NextResponse.json(
@@ -17,7 +16,6 @@ export async function GET(request: Request) {
       );
     }
 
-    // Buscar las entradas asociadas al email del usuario
     const entries = await prisma.entry.findMany({
       where: {
         userEmail: userEmail,

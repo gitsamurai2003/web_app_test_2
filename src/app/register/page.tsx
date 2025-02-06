@@ -2,17 +2,40 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import styles from "./Register.module.css"; // Importar el archivo de estilos
+import styles from "./Register.module.css"; 
 
 export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const validatePassword = (password) => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return regex.test(password);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage("");
+
+    if (!validateEmail(email)) {
+      setErrorMessage("El email no tiene un formato válido.");
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setErrorMessage("La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una letra minúscula, un número y un carácter especial.");
+      return;
+    }
+
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      setErrorMessage("Las contraseñas no coinciden.");
       return;
     }
 
@@ -26,15 +49,15 @@ export default function Register() {
       });
 
       if (res.ok) {
-        alert("User registered successfully");
+        alert("Usuario registrado con éxito");
         window.location.href = "/";
       } else {
         const data = await res.json();
-        alert(data.message);
+        setErrorMessage(data.message);
       }
     } catch (error) {
       console.error("An unexpected error occurred:", error);
-      alert("An unexpected error occurred");
+      setErrorMessage("Ocurrió un error inesperado");
     }
   };
 
@@ -69,11 +92,12 @@ export default function Register() {
             required
           />
         </div>
+        {errorMessage && <div className={styles.error}>{errorMessage}</div>}
         <button type="submit" className={styles.button}>&rarr;</button>
         <div className={styles.login}>
-          <span>Already have an account?</span>
+          <span>¿Ya tienes una cuenta?</span>
           <Link href="/" className={styles.loginLink}>
-            Login
+            Iniciar sesión
           </Link>
         </div>
       </form>

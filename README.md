@@ -2,6 +2,22 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+El orden de comandos para ejecutar localmente este proyecto es:
+npm i
+npm run dev
+
+por supuesto, si no se realizo el setup con kirimase, debe hacerse las migraciones de prisma con npx prisma migrate --name init
+npx prisma generate
+
+En el .env se debe contener las siguientes variables: 
+DATABASE_URL="" #Utilice postgresql con prisma 
+GITHUB_CLIENT_SECRET=""
+NEXTAUTH_URL="http://localhost:3000"
+GITHUB_CLIENT_ID=""
+AUTH_SECRET="" # Added by `npx auth`. Read more: https://cli.authjs.dev 
+
+##################################################################################
+
 First, run the development server:
 
 ```bash
