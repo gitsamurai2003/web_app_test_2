@@ -95,9 +95,9 @@ export default function Register() {
         {errorMessage && <div className={styles.error}>{errorMessage}</div>}
         <button type="submit" className={styles.button}>&rarr;</button>
         <div className={styles.login}>
-          <span>¿Ya tienes una cuenta?</span>
+          <span>Already have an account?</span>
           <Link href="/" className={styles.loginLink}>
-            Iniciar sesión
+            Login
           </Link>
         </div>
       </form>

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { downloadExcel } from '../excelUtils/excelUtils'; // Ajusta la ruta según donde hayas colocado el archivo
 import styles from "./Data.module.css"; // Asegúrate de que la ruta sea correcta
 
 interface Entry {
@@ -17,11 +18,15 @@ interface Entry {
 
 const DataPage: React.FC = () => {
   const [heatmapStyle, setHeatmapStyle] = useState({});
+  const [sortOrder, setSortOrder] = useState("none");
   const { data: session, status } = useSession();
   const router = useRouter();
   const [showSignOut, setShowSignOut] = useState(false);
   const [color, setColor] = useState("#00563b");
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchCriteria, setSearchCriteria] = useState("name");
+  const [filteredEntries, setFilteredEntries] = useState<Entry[]>(entries);
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // Estado para mensajes de error
   const [newEntry, setNewEntry] = useState<Entry>({
     id: Date.now(),
@@ -80,6 +85,38 @@ const DataPage: React.FC = () => {
     }
   }, [color]);
 
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+  
+    if (query.trim() === "") {
+      setFilteredEntries(entries);
+    } else {
+      const filtered = entries.filter((entry) => {
+        switch (searchCriteria) {
+          case "name":
+            return entry.name.toLowerCase().includes(query);
+          case "cedula":
+            return entry.cedula.toLowerCase().includes(query);
+          case "telefono":
+            return entry.telefono.toLowerCase().includes(query);
+          case "direccion":
+            return entry.direccion.toLowerCase().includes(query);
+          case "salario":
+            return entry.salario.toString().includes(query);
+          default:
+            return false;
+        }
+      });
+      setFilteredEntries(filtered);
+    }
+  };
+  
+  const handleCriteriaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSearchCriteria(e.target.value);
+  };
+  
+  
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/"); 
@@ -93,11 +130,53 @@ const DataPage: React.FC = () => {
         .then((data) => {
           console.log("Fetched entries:", data); 
           setEntries(data);
+          setFilteredEntries(data); 
         })
         .catch((error) => console.error("Error fetching entries:", error));
     }
   }, [session]);
 
+  function sanitizeData(entries: Entry[]): Omit<Entry, 'id' | 'userEmail'>[] {
+    return entries.map(({ id, userEmail, ...rest }) => rest);
+  }
+  
+  const handleDownload = () => {
+    const sanitizedEntries = sanitizeData(entries);
+    const sanitizedSortedEntries = sanitizeData(sortedEntries);
+    downloadExcel(sanitizedEntries, sanitizedSortedEntries, mediana, promedio);  
+  };
+
+  const handleSort = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortOrder(e.target.value);
+  
+    let sorted;
+    switch (e.target.value) {
+      case "nombre_asc":
+        sorted = [...entries].sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "nombre_desc":
+        sorted = [...entries].sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case "salario_mayor":
+        sorted = [...entries].sort((a, b) => b.salario - a.salario);
+        break;
+      case "salario_menor":
+        sorted = [...entries].sort((a, b) => a.salario - b.salario);
+        break;
+      case "cedula_mayor":
+        sorted = [...entries].sort((a, b) => parseInt(b.cedula) - parseInt(a.cedula));
+        break;
+      case "cedula_menor":
+        sorted = [...entries].sort((a, b) => parseInt(a.cedula) - parseInt(b.cedula));
+        break;
+      default:
+        sorted = entries;
+        break;
+    }
+  
+    setFilteredEntries(sorted);
+  };
+  
   if (status === "loading") return <p>Loading...</p>;
   if (!session) return <p>You are not logged in.</p>;
 
@@ -154,7 +233,7 @@ const DataPage: React.FC = () => {
     return null;
   };
   const handleAddEntry = async () => {
-    setErrorMessage(null); // Reinicia el mensaje de error al intentar agregar una nueva entrada
+    setErrorMessage(null); 
 
     if (!newEntry.name || !newEntry.cedula || !newEntry.telefono || !newEntry.direccion || !newEntry.salario || !newEntry.userEmail) {
       setErrorMessage("Todos los campos son requeridos");
@@ -256,11 +335,42 @@ const DataPage: React.FC = () => {
     <div className={styles.container}>
       <nav className={styles.navbar}>
         <div className={styles.heatmap} style={heatmapStyle}></div>
+        <select
+          value={searchCriteria}
+          onChange={handleCriteriaChange}
+          className={styles.searchCriteria}
+        >
+          <option value="name">Nombre</option>
+          <option value="cedula">Cédula</option>
+          <option value="telefono">Teléfono</option>
+          <option value="direccion">Dirección</option>
+          <option value="salario">Salario</option>
+        </select>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchQuery}
+          onChange={handleSearch}
+          className={styles.searchInput}
+        />
+        <select
+          value={sortOrder}
+          onChange={handleSort}
+          className={styles.sortOrder}
+        >
+          <option value="none">Ordenar</option>
+          <option value="nombre_asc">Nombre (A-Z)</option>
+          <option value="nombre_desc">Nombre (Z-A)</option>
+          <option value="salario_mayor">Salario (Mayor a Menor)</option>
+          <option value="salario_menor">Salario (Menor a Mayor)</option>
+          <option value="cedula_mayor">Cédula (Mayor a Menor)</option>
+          <option value="cedula_menor">Cédula (Menor a Mayor)</option>
+        </select>
         <div className={styles.navItems}>
-          <Link href="/users">Users</Link>
+        <Link href="/table">Shadcn Table</Link>
           <Link href="/data">Data</Link>
           <div onMouseEnter={() => setShowSignOut(true)} onMouseLeave={() => setShowSignOut(false)} className={styles.profileLink}>
-            <Link href="/profile">Profile</Link>
+            <Link href="">Profile</Link>
             {showSignOut && (
               <button onClick={() => signOut({ callbackUrl: "/" })} className={styles.signOutButton}>
                 Sign Out
@@ -270,6 +380,9 @@ const DataPage: React.FC = () => {
         </div>
       </nav>
       <main className={styles.mainContent}>
+      <button className={styles.button1} onClick={handleDownload}>
+        <img src="/icons8-ms-excel-50.png" alt="Excel Icon" />
+      </button>
         <button onClick={() => setIsFormVisible(!isFormVisible)} className={styles.addButton}>
           {isFormVisible ? '-' : '+'}
         </button>
@@ -284,7 +397,7 @@ const DataPage: React.FC = () => {
             {errorMessage && <div className={styles.error}>{errorMessage}</div>}
           </div>
         )}
-        <h2 className={styles.title}>Informacion de usuarios</h2>
+        <h2 className={styles.title}>Informacion de empleados</h2>
         <table className={styles.dataTable}>
           <thead>
             <tr>
@@ -296,7 +409,7 @@ const DataPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {entries.map((entry) => (
+            {filteredEntries.map((entry) => (
               <tr key={entry.id}>
                 <td>{entry.name}</td>
                 <td>{entry.cedula}</td>
@@ -332,7 +445,6 @@ const DataPage: React.FC = () => {
           </tbody>
         </table>
 
-        {/* Sección para mostrar la mediana y el promedio */}
         <div className={styles.statsSection}>
           <div className={styles.statBox}>
             <h3 className={styles.title}>Mediana de Salarios:</h3><p className={styles.dataTable}>&#8594; {mediana.toFixed(2)}$</p>

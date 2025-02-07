@@ -32,7 +32,6 @@ export async function GET(request: Request) {
   }
 }
 
-// POST: Crear una nueva entrada
 export async function POST(request: Request) {
   try {
     const { name, cedula, telefono, direccion, salario, userEmail } = await request.json();
@@ -54,7 +53,7 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'El usuario no existe' },
+        { error: 'El empleado no existe' },
         { status: 404 }
       );
     }

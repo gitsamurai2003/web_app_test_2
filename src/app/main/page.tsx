@@ -74,14 +74,14 @@ const Main: React.FC = () => {
       <nav className={styles.navbar}>
         <div className={styles.heatmap} style={heatmapStyle}></div>
         <div className={styles.navItems}>
-          <Link href="/users">Users</Link>
+          <Link href="/table">Shadcn Table</Link>
           <Link href="/data">Data</Link>
           <div
             onMouseEnter={() => setShowSignOut(true)}
             onMouseLeave={() => setShowSignOut(false)}
             className={styles.profileLink}
           >
-            <Link href="/profile">Profile</Link>
+            <Link href="">Profile</Link>
             {showSignOut && (
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}

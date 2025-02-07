@@ -46,7 +46,7 @@
   
   .button {
     padding: 0.75rem 2rem; /* Ajustar el padding para un mejor tamaño del botón */
-    background-color: #00563b;
+    background-color: #2F4F4F; /* Dark Slate Gray */  
     color: white;
     border: none;
     border-radius: 4px;
@@ -57,7 +57,7 @@
   }
   
   .button:hover {
-    background-color: #123524;
+    background-color: #A9A9A9; /* Dark Gray */
   }
   
   .register {
