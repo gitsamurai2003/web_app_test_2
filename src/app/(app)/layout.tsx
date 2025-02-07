@@ -1,7 +1,4 @@
 import { checkAuth } from "@/lib/auth/utils";
-import { checkAuth } from "@/lib/auth/utils";
-import { checkAuth } from "@/lib/auth/utils";
-import { checkAuth } from "@/lib/auth/utils";
 import { Toaster } from "@/components/ui/sonner";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";

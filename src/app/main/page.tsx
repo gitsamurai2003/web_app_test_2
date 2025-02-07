@@ -34,7 +34,7 @@ const Main: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (e: any) => {
     const { clientX, clientY } = e;
     setHeatmapStyle({
       background: `radial-gradient(circle at ${clientX}px ${clientY}px, ${color}, transparent 3%)`,

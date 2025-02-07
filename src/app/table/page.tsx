@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./Table.module.css"; // Asegúrate de que la ruta sea correcta
 
-
 interface Entry {
   id: number;
   name: string;
@@ -17,14 +16,6 @@ interface Entry {
   direccion: string;
   salario: number;
   userEmail: string;
-}
-
-// Función para agregar el signo de dólar a los salarios
-function formatEntries(entries: Entry[]): Entry[] {
-  return entries.map((entry) => ({
-    ...entry,
-    salario: `${entry.salario}$`,
-  }));
 }
 
 export default function DemoPage() {
@@ -38,7 +29,7 @@ export default function DemoPage() {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/"); 
+      router.push("/");
     }
   }, [status, router]);
 
@@ -48,14 +39,13 @@ export default function DemoPage() {
         .then((res) => res.json())
         .then((data) => {
           console.log("Fetched entries:", data);
-          const formattedEntries = formatEntries(data);
-          setEntries(formattedEntries);
+          setEntries(data);
         })
         .catch((error) => console.error("Error fetching entries:", error));
     }
   }, [session]);
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (e: any) => {
     const { clientX, clientY } = e;
     setHeatmapStyle({
       background: `radial-gradient(circle at ${clientX}px ${clientY}px, ${color}, transparent 3%)`,
@@ -99,7 +89,7 @@ export default function DemoPage() {
       <nav className={styles.navbar}>
         <div className={styles.heatmap} style={heatmapStyle}></div>
         <div className={styles.navItems}>
-        <Link href="/table">Shadcn Table</Link>
+          <Link href="/table">Shadcn Table</Link>
           <Link href="/data">Data</Link>
           <div onMouseEnter={() => setShowSignOut(true)} onMouseLeave={() => setShowSignOut(false)} className={styles.profileLink}>
             <Link href="/profile">Profile</Link>
@@ -111,14 +101,17 @@ export default function DemoPage() {
           </div>
         </div>
       </nav>
-            <main className={styles.mainContent}>
+      <main className={styles.mainContent}>
         <div className={styles.titleContainer}>
-            <h1 className={styles.title}>Shadcn Table</h1>
+          <h1 className={styles.title}>Shadcn Table</h1>
         </div>
         <div className="container mx-auto py-10">
-            <DataTable columns={columns} data={entries} />
+          <DataTable
+            columns={columns}
+            data={entries}
+          />
         </div>
-        </main>
+      </main>
     </div>
   );
 }
